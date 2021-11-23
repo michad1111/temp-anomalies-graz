@@ -10,13 +10,13 @@ def temp_anomalies_graz():
         "--start",
         required=True,
         type=int,
-        help="Starting year of the reference frame.",
+        help="Start year of the reference timeframe.",
     )
     parser.add_argument(
         "--end",
         required=True,
         type=int,
-        help="End year of the reference frame.",
+        help="End year of the reference timeframe.",
     )
     parser.add_argument(
         "--month",
@@ -29,7 +29,7 @@ def temp_anomalies_graz():
         required=False,
         nargs="+",
         type=int,
-        help="List with start and end year of time frame to compare to reference frame",
+        help="two integers for the start and end year of timeframe to compare to reference frame",
     )
     parser.add_argument(
         "--fig",
