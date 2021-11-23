@@ -15,9 +15,11 @@ if np.shape(data_date)[0] != np.shape(data_temp)[0]:
     raise Warning("length of date and temp data does not match")
 
 
-def calc_mean(year_start, year_end, month=0, year_comp=None):
+def calc_mean(year_start, year_end, month=None, year_comp=None):
     if year_comp is None:
         year_comp = [year_start, year_end + 1]
+    if month is None:
+        month = int(0)
 
     if np.datetime64(f"{year_start}") < min(data_date):
         raise Warning(f"start date to early! earliest date: {min(data_date)}")

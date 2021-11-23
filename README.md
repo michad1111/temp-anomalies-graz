@@ -1,4 +1,4 @@
-#Temperature anomalies in Graz
+# Temperature anomalies in Graz
 
 ## Michael Hadwiger - 11814638
 
