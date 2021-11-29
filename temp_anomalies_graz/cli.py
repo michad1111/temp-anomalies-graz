@@ -4,7 +4,7 @@ from . import temp_anomalies
 
 
 def temp_anomalies_graz():
-    """Entry point for the temp_anomalies"""
+    """Entry point for the temp_anomalies_graz"""
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--start",

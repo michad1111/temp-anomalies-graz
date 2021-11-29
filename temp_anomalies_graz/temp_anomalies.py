@@ -64,7 +64,6 @@ def figure(years, anomalies, year_comp, year_start, year_end):
         anomalies[year_comp[0] - years[0] : year_comp[1] - years[0] + 1],
         label=["t", "tmax", "tmin"],
     )
-    # ax.plot(years, moving_average, label="trend (5 years)")
     ax.set_xlabel("year")
     ax.set_ylabel(r"$\Delta$ T / °C")
     ax.set_title(
@@ -75,17 +74,3 @@ def figure(years, anomalies, year_comp, year_start, year_end):
     plt.show()
 
     fig.savefig("anomalies.png")
-
-
-"""    
-def trend():
-    # trend (moving average)
-    average_length = 5
-    aver_delta = int(np.floor(average_length / 2))
-    moving_average = np.empty(np.shape(anomalies))
-    moving_average[:] = np.nan
-    for index in range(aver_delta, len(anomalies) - aver_delta):
-        moving_average[index, :] = np.nanmean(
-            anomalies[index - aver_delta: index + aver_delta], axis=0
-        )
-"""
