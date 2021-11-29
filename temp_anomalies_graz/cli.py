@@ -22,7 +22,7 @@ def temp_anomalies_graz():
         "--month",
         required=False,
         type=int,
-        help="Month for which the mean values are calculated (0 to 11, Default 0: January)",
+        help="Month for which the mean values are calculated (0 for all months or 1-12 for specific month) Default: 0",
     )
     parser.add_argument(
         "--comp",
@@ -37,11 +37,21 @@ def temp_anomalies_graz():
         action="store_true",
         help="Show data in figure.",
     )
+    parser.add_argument(
+        "--trend",
+        required=False,
+        action="store_true",
+        help="Show trend in figure.",
+    )
 
     args = parser.parse_args()
 
     anomalies, years = temp_anomalies.calc_mean(
         args.start, args.end, args.month, args.comp
     )
+    if args.trend:
+        trend = temp_anomalies.trend(anomalies, years)
+    else:
+        trend = None
     if args.fig:
-        temp_anomalies.figure(years, anomalies, args.comp, args.start, args.end)
+        temp_anomalies.figure(years, anomalies, args.comp, args.start, args.end, args.month, trend)
