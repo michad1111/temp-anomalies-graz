@@ -14,19 +14,21 @@ data_temp = np.genfromtxt(file_path, skip_header=1, usecols=(2, 3, 4), delimiter
 if np.shape(data_date)[0] != np.shape(data_temp)[0]:
     raise Warning("length of date and temp data does not match")
 
-month_dict = {0: 'all months',
-              1: 'January',
-              2: 'February',
-              3: 'March',
-              4: 'April',
-              5: 'May',
-              6: 'June',
-              7: 'July',
-              8: 'August',
-              9: 'September',
-              10: 'October',
-              11: 'November',
-              12: 'December',}
+month_dict = {
+    0: "all months",
+    1: "January",
+    2: "February",
+    3: "March",
+    4: "April",
+    5: "May",
+    6: "June",
+    7: "July",
+    8: "August",
+    9: "September",
+    10: "October",
+    11: "November",
+    12: "December",
+}
 
 
 def calc_mean(year_start, year_end, month=None, year_comp=None):
@@ -51,7 +53,8 @@ def calc_mean(year_start, year_end, month=None, year_comp=None):
             np.datetime64(f"{year}") + np.timedelta64(month_shift - 1, "M"),
             np.datetime64(f"{year}") + np.timedelta64(month_shift, "M"),
         ]
-        if month == int(0): timestamp[1] += np.timedelta64(11, "M")
+        if month == int(0):
+            timestamp[1] += np.timedelta64(11, "M")
         filter_date = (data_date >= timestamp[0]) & (data_date < timestamp[1])
         mean_new = np.nanmean(data_temp[filter_date], axis=0)
         mean_years = np.append(mean_years, [mean_new], axis=0)
@@ -63,26 +66,38 @@ def calc_mean(year_start, year_end, month=None, year_comp=None):
     anomalies = mean_years - mean_timeframe
 
     anomalies_comp = anomalies[year_comp[0] - years[0] : year_comp[1] - years[0] + 1]
-    print(f"Anomalies for {month_dict[month]} from {year_comp[0]} to {year_comp[1]}: ", anomalies_comp)
+    print(
+        f"Anomalies for {month_dict[month]} from {year_comp[0]} to {year_comp[1]}: ",
+        anomalies_comp,
+    )
 
     return anomalies, years
 
 
-def trend(anomalies, years, year_comp = None):
+def trend(anomalies, years, year_comp=None):
     if year_comp is None:
         year_comp = [min(years), max(years)]
 
-    anomalies_timefilter = anomalies[year_comp[0] - years[0] : year_comp[1] - years[0] + 1, 0]
+    anomalies_timefilter = anomalies[
+        year_comp[0] - years[0] : year_comp[1] - years[0] + 1, 0
+    ]
     fit_valid_points = ~np.isnan(anomalies_timefilter)
-    trend = np.polyfit(np.arange(year_comp[0], year_comp[1] + 1)[fit_valid_points], anomalies_timefilter[fit_valid_points], 1)
-    print(f"trend: {trend}")
-    return trend
+    trend_coef = np.polyfit(
+        np.arange(year_comp[0], year_comp[1] + 1)[fit_valid_points],
+        anomalies_timefilter[fit_valid_points],
+        1,
+    )
+    print(f"trend: {trend_coef}")
+    return trend_coef
+
 
 def get_year(data_obj):
     return data_obj.astype("datetime64[Y]").astype(int) + 1970
 
 
-def figure(years, anomalies, year_comp, year_start, year_end, month=None, trend=None):
+def figure(
+    years, anomalies, year_comp, year_start, year_end, month=None, trend_coef=None
+):
     if year_comp is None:
         year_comp = [year_start, year_end]
     if month is None:
@@ -94,11 +109,13 @@ def figure(years, anomalies, year_comp, year_start, year_end, month=None, trend=
         anomalies[year_comp[0] - years[0] : year_comp[1] - years[0] + 1],
         label=["t", "tmax", "tmin"],
     )
-    if trend is not None:
-        t_trend = np.polyval(trend, years)
-        ax.plot(years[year_comp[0] - years[0] : year_comp[1] - years[0] + 1],
-                t_trend[year_comp[0] - years[0] : year_comp[1] - years[0] + 1],
-                label=f"t-trend {np.round(trend[0]*10, 2)} °C/dec")
+    if trend_coef is not None:
+        temp_trend = np.polyval(trend_coef, years)
+        ax.plot(
+            years[year_comp[0] - years[0] : year_comp[1] - years[0] + 1],
+            temp_trend[year_comp[0] - years[0] : year_comp[1] - years[0] + 1],
+            label=f"t-trend {np.round(trend_coef[0]*10, 2)} °C/dec",
+        )
     ax.set_xlabel("year")
     ax.set_ylabel(r"$\Delta$ T / °C")
     ax.set_title(
@@ -109,8 +126,3 @@ def figure(years, anomalies, year_comp, year_start, year_end, month=None, trend=
     plt.show()
 
     fig.savefig("anomalies.png")
-
-
-# anom, yea = calc_mean(1995,2020)
-# trend = trend(anom, yea, [2010,2020])
-# print(trend)

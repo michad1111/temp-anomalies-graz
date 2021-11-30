@@ -12,11 +12,12 @@ specified reference timeframe can be calculated and shown in a figure.
 The package provides a shell script `temp_anomalies-graz` with the following required arguments:
 - `--start`: Starting year of the reference timeframe.
 - `--end`: End year of the reference timeframe.
-- `--month`: Month for which the mean values are calculated (0 to 11, Default 0: January)
+- `--month`: Month for which the mean values are calculated (1 to 12). If not specified or 0 the mean will be calculated over all months.
 
 Additional optional arguments:
 - `--comp`: wo integers for the start and end year of timeframe to compare to reference frame
 - `--fig`: show data in figure
+- `--trend`: calculate and show trend for timespan specified in `--comp`
 
 For further information please see `temp_anomalies_graz --help`.
 
@@ -53,5 +54,4 @@ python -m pip install -e .
 ## Requirements
 
 - `numpy >= 1.18`
-- `pyYAML`
 - `matplotlib`

@@ -54,4 +54,6 @@ def temp_anomalies_graz():
     else:
         trend_coef = None
     if args.fig:
-        temp_anomalies.figure(years, anomalies, args.comp, args.start, args.end, args.month, trend_coef)
+        temp_anomalies.figure(
+            years, anomalies, args.comp, args.start, args.end, args.month, trend_coef
+        )
