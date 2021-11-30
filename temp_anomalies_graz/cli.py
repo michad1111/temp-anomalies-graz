@@ -41,7 +41,7 @@ def temp_anomalies_graz():
         "--trend",
         required=False,
         action="store_true",
-        help="Show trend in figure.",
+        help="Show trend in figure. Trend will be calculated for the timespan specified in --comp",
     )
 
     args = parser.parse_args()
@@ -50,8 +50,8 @@ def temp_anomalies_graz():
         args.start, args.end, args.month, args.comp
     )
     if args.trend:
-        trend = temp_anomalies.trend(anomalies, years)
+        trend_coef = temp_anomalies.trend(anomalies, years, args.comp)
     else:
-        trend = None
+        trend_coef = None
     if args.fig:
-        temp_anomalies.figure(years, anomalies, args.comp, args.start, args.end, args.month, trend)
+        temp_anomalies.figure(years, anomalies, args.comp, args.start, args.end, args.month, trend_coef)
