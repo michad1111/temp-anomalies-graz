@@ -2,17 +2,15 @@ import numpy as np
 import matplotlib.pyplot as plt
 import os
 from pkg_resources import resource_filename
+import pandas as pd
 
 file_path = resource_filename(__name__, os.path.join("data", "klima-daily_Graz.csv"))
 
-data_date = np.genfromtxt(
-    file_path, skip_header=1, usecols=1, delimiter=",", dtype=np.datetime64
-)
-data_temp = np.genfromtxt(file_path, skip_header=1, usecols=(2, 3, 4), delimiter=",")
-
-# check for equal length of data sets
-if np.shape(data_date)[0] != np.shape(data_temp)[0]:
-    raise Warning("length of date and temp data does not match")
+data = pd.read_csv(file_path, index_col=1, parse_dates=True)
+data = data[(data["t"].notna())]
+data["time_copy"] = pd.to_datetime(data.index)
+data["month"] = data.time_copy.dt.month
+data["year"] = data.time_copy.dt.year
 
 month_dict = {
     0: "all months",
@@ -31,47 +29,26 @@ month_dict = {
 }
 
 
-def calc_mean(year_start, year_end, month=None, year_comp=None):
-    if year_comp is None:
-        year_comp = [year_start, year_end + 1]
-    if month is None:
-        month = int(0)
-        month_shift = int(1)
-    else:
-        month_shift = month
+def calc_mean(year_start, year_end):
 
-    if np.datetime64(f"{year_start}") < min(data_date):
-        raise Warning(f"start date to early! earliest date: {min(data_date)}")
-    if np.datetime64(f"{year_end}") > max(data_date):
-        raise Warning(f"end date to late! maximum date: {max(data_date)}")
+    gru = data.groupby("time").groups
+    if np.datetime64(f"{year_start}") < min(data["time_copy"]):
+        raise Warning(f"start date to early! earliest date: {min(data['time_copy'])}")
+    if np.datetime64(f"{year_end}") > max(data['time_copy']):
+        raise Warning(f"end date to late! maximum date: {max(data['time_copy'])}")
 
-    years = range(get_year(min(data_date)), get_year(max(data_date)) + 1)
+    monthly_av = data.groupby([data.index.year, data.index.month]).mean().dropna()
 
-    mean_years = [[0, 0, 0]]
-    for year in years:
-        timestamp = [
-            np.datetime64(f"{year}") + np.timedelta64(month_shift - 1, "M"),
-            np.datetime64(f"{year}") + np.timedelta64(month_shift, "M"),
-        ]
-        if month == int(0):
-            timestamp[1] += np.timedelta64(11, "M")
-        filter_date = (data_date >= timestamp[0]) & (data_date < timestamp[1])
-        mean_new = np.nanmean(data_temp[filter_date], axis=0)
-        mean_years = np.append(mean_years, [mean_new], axis=0)
-    mean_years = mean_years[1:]
+    timeframe = monthly_av[(monthly_av.year >= year_start) & (monthly_av.year <= year_end)]
+    timeframe_av = timeframe.groupby(timeframe.month).mean()
 
-    mean_timeframe = np.nanmean(
-        mean_years[year_start - years[0] : year_end - years[-1] - 1], axis=0
-    )
-    anomalies = mean_years - mean_timeframe
+    for col in ["t", "tmax", "tmin"]:
+        for i in range(1,13):
+            monthly_av.loc[monthly_av.month == i, f"{col}_anom"] = monthly_av.loc[monthly_av.month == i, f"{col}"] - timeframe_av.loc[i, f"{col}"]
 
-    anomalies_comp = anomalies[year_comp[0] - years[0] : year_comp[1] - years[0] + 1]
-    print(
-        f"Anomalies for {month_dict[month]} from {year_comp[0]} to {year_comp[1]}: ",
-        anomalies_comp,
-    )
+    yearly_av_anom = monthly_av.groupby(monthly_av.year).mean()
 
-    return anomalies, years
+    return monthly_av, yearly_av_anom
 
 
 def trend(anomalies, years, year_comp=None):
@@ -126,3 +103,5 @@ def figure(
     plt.show()
 
     fig.savefig("anomalies.png")
+
+calc_mean(1995,2000)

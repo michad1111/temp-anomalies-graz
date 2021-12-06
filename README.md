@@ -55,3 +55,4 @@ python -m pip install -e .
 
 - `numpy >= 1.18`
 - `matplotlib`
+- `pandas`
