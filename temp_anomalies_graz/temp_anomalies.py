@@ -71,41 +71,41 @@ def trend(anomalies, years, year_comp=None):
     return trend_coef
 
 
-def get_year(data_obj):
-    return data_obj.astype("datetime64[Y]").astype(int) + 1970
-
-
 def figure(
-    years, anomalies, year_comp, year_start, year_end, month=None, trend_coef=None
+    monthly_av, yearly_av, year_comp, year_start, year_end, month, trend_coef=None
 ):
     if year_comp is None:
         year_comp = [year_start, year_end]
-    if month is None:
-        month = int(0)
 
-    fig, ax = plt.subplots()
-    ax.plot(
-        years[year_comp[0] - years[0] : year_comp[1] - years[0] + 1],
-        anomalies[year_comp[0] - years[0] : year_comp[1] - years[0] + 1],
-        label=["t", "tmax", "tmin"],
-    )
-    if trend_coef is not None:
-        temp_trend = np.polyval(trend_coef, years)
-        ax.plot(
-            years[year_comp[0] - years[0] : year_comp[1] - years[0] + 1],
-            temp_trend[year_comp[0] - years[0] : year_comp[1] - years[0] + 1],
-            label=f"t-trend {np.round(trend_coef[0]*10, 2)} °C/dec",
-        )
-    ax.set_xlabel("year")
-    ax.set_ylabel(r"$\Delta$ T / °C")
-    ax.set_title(
+    years = monthly_av.index.get_level_values(0).astype(str)
+    months = monthly_av.index.get_level_values(1).astype(str)
+    dates = pd.to_datetime(years + "-" + months + "-01")
+    monthly_av = monthly_av.set_index(dates)
+
+    fig, axs = plt.subplots(3, sharex=True, sharey=True)
+    axs[0].plot(dates, monthly_av["t_anom"], label="t", color="g")
+    axs[1].plot(dates, monthly_av["tmax_anom"], label="tmax", color="r")
+    axs[2].plot(dates, monthly_av["tmin_anom"], label="tmin", color="b")
+    plt.xlim(pd.to_datetime([year_comp[0], year_comp[1] + 1], format="%Y"))
+    # TODO: option to change time resolution in yearly case
+    # if trend_coef is not None:
+    #     temp_trend = np.polyval(trend_coef, years)
+    #     ax.plot(
+    #         years[year_comp[0] - years[0] : year_comp[1] - years[0] + 1],
+    #         temp_trend[year_comp[0] - years[0] : year_comp[1] - years[0] + 1],
+    #         label=f"t-trend {np.round(trend_coef[0]*10, 2)} °C/dec",
+    #     )
+    axs[2].set_xlabel("year")
+    for i in range(3):
+        axs[i].set_ylabel(r"$\Delta$ T / °C")
+        axs[i].legend()
+        axs[i].grid()
+    fig.suptitle(
         f"temperature anomalies for {month_dict[month]} in Graz (compaired to {year_start}-{year_end})"
     )
-    ax.legend()
-    ax.grid()
-    plt.show()
 
     fig.savefig("anomalies.png")
 
 
-calc_mean(1995, 2000)
+mon, yea = calc_mean(1995, 2000)
+figure(mon, yea, [1985, 2020], 1995, 2020, int(0))

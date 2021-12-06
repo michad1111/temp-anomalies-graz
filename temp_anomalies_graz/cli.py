@@ -47,12 +47,12 @@ def temp_anomalies_graz():
 
     args = parser.parse_args()
 
-    anomalies, years = temp_anomalies.calc_mean(args.start, args.end)
+    monthly, yearly = temp_anomalies.calc_mean(args.start, args.end)
     if args.trend:
         trend_coef = temp_anomalies.trend(anomalies, years, args.comp)
     else:
         trend_coef = None
     if args.fig:
         temp_anomalies.figure(
-            years, anomalies, args.comp, args.start, args.end, args.month, trend_coef
+            monthly, yearly, args.comp, args.start, args.end, args.month, trend_coef
         )
