@@ -27,7 +27,7 @@ def temp_anomalies_graz():
     )
     parser.add_argument(
         "--comp",
-        required=False,
+        required=True,
         nargs="+",
         type=int,
         help="two integers for the start and end year of timeframe to compare to reference frame",
@@ -49,17 +49,14 @@ def temp_anomalies_graz():
 
     monthly, yearly = temp_anomalies.calc_mean(args.start, args.end)
     if args.trend:
-        trend_coef, time_vec = temp_anomalies.trend(monthly, args.month, args.comp)
+        trend_coef = temp_anomalies.trend(monthly, args.month, args.comp)
     else:
-        trend_coef, time_vec = None
+        trend_coef = None
     if args.fig:
         temp_anomalies.figure(
             monthly,
             yearly,
             args.comp,
-            args.start,
-            args.end,
             args.month,
             trend_coef,
-            time_vec,
         )

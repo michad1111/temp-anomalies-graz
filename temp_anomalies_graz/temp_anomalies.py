@@ -1,6 +1,5 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import matplotlib.dates as mdates
 import os
 from pkg_resources import resource_filename
 import pandas as pd
@@ -55,14 +54,11 @@ def calc_mean(year_start, year_end):
     return monthly_av, yearly_av
 
 
-def trend(monthly_av, month, year_comp=None):
+def trend(monthly_av, month, year_comp):
     if year_comp is None:
         year_comp = [min(monthly_av.year), max(monthly_av.year)]
 
-    years = monthly_av.index.get_level_values(0).astype(str)
-    months = monthly_av.index.get_level_values(1).astype(str)
-    dates = pd.to_datetime(years + "-" + months + "-01")
-    monthly_av = monthly_av.set_index(dates)
+    monthly_av = reset_index(monthly_av)
 
     monthly_av_filter = monthly_av[
         (monthly_av.year >= year_comp[0]) & (monthly_av.year <= year_comp[1])
@@ -75,40 +71,35 @@ def trend(monthly_av, month, year_comp=None):
         1,
     )
     print(f"trend: {trend_coef}")
-    return trend_coef, monthly_av_filter.year
+    return trend_coef
 
 
 def figure(
     monthly_av,
     yearly_av,
     year_comp,
-    year_start,
-    year_end,
     month,
-    trend_coef=None,
-    time_vec=None,
+    trend_coef,
 ):
     if year_comp is None:
-        year_comp = [year_start, year_end]
+        year_comp = [min(monthly_av.year), max(monthly_av.year)]
 
     if month != 0:
         monthly_av = monthly_av[monthly_av.month == month]
+
     monthly_av = monthly_av[
         (monthly_av.year >= year_comp[0]) & (monthly_av.year <= year_comp[1])
     ]
 
-    years = monthly_av.index.get_level_values(0).astype(str)
-    months = monthly_av.index.get_level_values(1).astype(str)
-    dates = pd.to_datetime(years + "-" + months + "-01")
-    monthly_av = monthly_av.set_index(dates)
+    monthly_av = reset_index(monthly_av)
 
     fig, axs = plt.subplots(3, sharex=True, sharey=True)
     axs[0].plot(monthly_av.index, monthly_av["t_anom"], label="t", color="g")
     axs[1].plot(monthly_av.index, monthly_av["tmax_anom"], label="tmax", color="r")
     axs[2].plot(monthly_av.index, monthly_av["tmin_anom"], label="tmin", color="b")
-    plt.xlim(pd.to_datetime([year_comp[0], year_comp[1] + 1], format="%Y"))
+    plt.xlim(pd.to_datetime([year_comp[0] + 1, year_comp[1] + 1], format="%Y"))
     # TODO: option to change time resolution in yearly case
-    if (trend_coef is not None) and (time_vec is not None):
+    if trend_coef is not None:
         temp_trend = np.polyval(trend_coef, monthly_av.year)
         axs[0].plot(
             monthly_av.index,
@@ -121,15 +112,16 @@ def figure(
         axs[i].legend()
         axs[i].grid()
     fig.suptitle(
-        f"temperature anomalies for {month_dict[month]} in Graz (compaired to {year_start}-{year_end})"
+        f"temperature anomalies for {month_dict[month]} in Graz (compaired to {year_comp[0]}-{year_comp[1]})"
     )
 
     fig.savefig("anomalies.png")
 
 
-com = [1990, 2010]
-st = 1995
-en = 2020
-mon, yea = calc_mean(st, en)
-trend_c, time_v = trend(mon, 2, com)
-figure(mon, yea, com, st, en, 2, trend_c, time_v)
+def reset_index(monthly_av):
+    years = monthly_av.index.get_level_values(0).astype(str)
+    months = monthly_av.index.get_level_values(1).astype(str)
+    dates = pd.to_datetime(years + "-" + months + "-01")
+    monthly_av = monthly_av.set_index(dates)
+
+    return monthly_av
