@@ -1,0 +1,11 @@
+[flake8]
+ignore =
+    # E501 No check for too long lines; black should format long lines
+    E501,
+    # W503 line break before binary operator; this conflicts with black
+    W503,
+    # E203 whitespace before ':'; this conflicts with black
+    E203,
+    # E231 missing whitespace after ','; this conflicts with black
+    E231
+exclude = build,dist,.eggs
