@@ -30,25 +30,28 @@ month_dict = {
 
 
 def calc_mean(year_start, year_end):
-
-    gru = data.groupby("time").groups
-    if np.datetime64(f"{year_start}") < min(data["time_copy"]):
+    if year_start < min(data["year"]):
         raise Warning(f"start date to early! earliest date: {min(data['time_copy'])}")
-    if np.datetime64(f"{year_end}") > max(data['time_copy']):
+    if year_end > max(data["year"]):
         raise Warning(f"end date to late! maximum date: {max(data['time_copy'])}")
 
     monthly_av = data.groupby([data.index.year, data.index.month]).mean().dropna()
 
-    timeframe = monthly_av[(monthly_av.year >= year_start) & (monthly_av.year <= year_end)]
+    timeframe = monthly_av[
+        (monthly_av.year >= year_start) & (monthly_av.year <= year_end)
+    ]
     timeframe_av = timeframe.groupby(timeframe.month).mean()
 
     for col in ["t", "tmax", "tmin"]:
-        for i in range(1,13):
-            monthly_av.loc[monthly_av.month == i, f"{col}_anom"] = monthly_av.loc[monthly_av.month == i, f"{col}"] - timeframe_av.loc[i, f"{col}"]
+        for i in range(1, 13):
+            monthly_av.loc[monthly_av.month == i, f"{col}_anom"] = (
+                monthly_av.loc[monthly_av.month == i, f"{col}"]
+                - timeframe_av.loc[i, f"{col}"]
+            )
 
-    yearly_av_anom = monthly_av.groupby(monthly_av.year).mean()
+    yearly_av = monthly_av.groupby(monthly_av.year).mean()
 
-    return monthly_av, yearly_av_anom
+    return monthly_av, yearly_av
 
 
 def trend(anomalies, years, year_comp=None):
@@ -104,4 +107,5 @@ def figure(
 
     fig.savefig("anomalies.png")
 
-calc_mean(1995,2000)
+
+calc_mean(1995, 2000)
