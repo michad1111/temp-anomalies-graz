@@ -49,10 +49,17 @@ def temp_anomalies_graz():
 
     monthly, yearly = temp_anomalies.calc_mean(args.start, args.end)
     if args.trend:
-        trend_coef = temp_anomalies.trend(anomalies, years, args.comp)
+        trend_coef, time_vec = temp_anomalies.trend(monthly, args.month, args.comp)
     else:
-        trend_coef = None
+        trend_coef, time_vec = None
     if args.fig:
         temp_anomalies.figure(
-            monthly, yearly, args.comp, args.start, args.end, args.month, trend_coef
+            monthly,
+            yearly,
+            args.comp,
+            args.start,
+            args.end,
+            args.month,
+            trend_coef,
+            time_vec,
         )
