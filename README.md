@@ -13,13 +13,15 @@ The package provides a shell script `temp_anomalies-graz` with the following req
 - `--start`: Starting year of the reference timeframe.
 - `--end`: End year of the reference timeframe.
 - `--month`: Month for which the mean values are calculated (1 to 12). If not specified or 0 the mean will be calculated over all months.
+- `--comp`: wo integers for the start and end year of timeframe to compare to reference frame
 
 Additional optional arguments:
-- `--comp`: wo integers for the start and end year of timeframe to compare to reference frame
 - `--fig`: show data in figure
 - `--trend`: calculate and show trend for timespan specified in `--comp`
 
 For further information please see `temp_anomalies_graz --help`.
+
+Until `v1.0` the calculation was done using only `numpy`. Since then, `pandas` is used. 
 
 ## Installation
 
